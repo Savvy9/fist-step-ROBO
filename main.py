@@ -16,7 +16,7 @@ cam  = cv2.VideoCapture(0)
 dire = ['top','right','bottom','left']
 findball = False
 i = 0
-
+width,height = 0
 def api(imagename):
 	image = Image.open(imagename).convert("RGB")
 	buffered = io.BytesIO()
@@ -24,21 +24,23 @@ def api(imagename):
 	img_str = base64.b64encode(buffered.getvalue())
 	img_str = img_str.decode("ascii")
 	upload_url = "".join([
-		    "https://detect.roboflow.com/minge/2",
-		    "?api_key=qG35nU2qVCqQDzCgOqnL",
-		    f"&name={imagename}"
-	])
+		"https://detect.roboflow.com/minge/2",
+		"?api_key=qG35nU2qVCqQDzCgOqnL",
+		f"&name={imagename}"
+		])
 	r = requests.post(upload_url,data = image_str,headers={
 		"Content-Type": "application/x-www-form-urlencoded"
 		})
 	preds = r.json()
 	detections = preds['predicitons']
-	for target in detections:
+	for box in detections:
 		x1 = box['x'] - box['width']/2
 		x2 = box['x'] + box['width']/2
 		y1 = box['y'] - box['height']/2
 		y2 = box['y'] + box['height']/2
-	return x1,x2,y1,y2
+		width = box['width']
+		height = box['height']
+		return x1,x2,y1,y2
 def get_image():
 	s,img = cam.read()
 	if s:
@@ -49,17 +51,29 @@ def get_image():
 			findball = True
 def rotate():
 	#rotate 90* grade
-	if i == 0:
-		get_image()
-		i = i + 1
-	else:
-		i = i + 1
-		get_image()
-
-
-
-
+	get_image()
+	i = i + 1
+def correction(x1,x2,y1,y2):
+	rezx = width
+	rezy = height
+	minimaljokeplus = 200
+	minimaljokeminus = -200
+	minheigtplus = 200
+	minheigtmin = -200
+	#width
+	if(x1<minimaljokeminus):
+		print('The ball is outside of the perimeter')
+		#moving left
+		distance_correction = abs(x1+minimaljoke)
+	elif(x2>minimaljokeplus):
+		#moving right
+		distance_correction = x2-minimaljoke
+	#height
+	if(y1>minimaljokeplus):
+		h = y1-minimaljokeplus
+	elif y1<minimaljokeminus:
+		h = y1+minimaljokeminus
 while True:
 	if findball == True:
 		break
-	rotate()
+		rotate()
