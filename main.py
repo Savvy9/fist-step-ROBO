@@ -8,10 +8,18 @@ import requests
 import base64
 import io
 from PIL import Image
+from pymata4 import pymata4
+import motor1
 
 cam  = cv2.VideoCapture(0)
 
+triggerPin = 11
+echo_pin = 12
 
+board = pymata4.Pymata4()
+def the_callback(data):
+	print("distance: ",data)
+board.set_pin_mode_sonar(triggerPin,echo_pin,the_callback)
 
 dire = ['top','right','bottom','left']
 findball = False
@@ -63,17 +71,27 @@ def correction(x1,x2,y1,y2):
 	#width
 	if(x1<minimaljokeminus):
 		print('The ball is outside of the perimeter')
-		#moving left
+		motor1.move_left(time)
 		distance_correction = abs(x1+minimaljoke)
 	elif(x2>minimaljokeplus):
-		#moving right
-		distance_correction = x2-minimaljoke
+		motor1.move_right(time)
+		distance_correction = abs(x2-minimaljoke)
 	#height
 	if(y1>minimaljokeplus):
-		h = y1-minimaljokeplus
+		h = abs(y1-minimaljokeplus)
 	elif y1<minimaljokeminus:
-		h = y1+minimaljokeminus
+		h = (y1+minimaljokeminus)
+	return distance_correction,h
 while True:
 	if findball == True:
 		break
-		rotate()
+	x1,x2,y1,y2 = rotate()
+	weights,height = correction(x1,x2,y1,y2)
+	#move forward
+
+while True:
+	try:
+		time.sleep(1)
+		board.sonar_read(triggerPin)
+	except Exception:
+		board.shutdown()
