@@ -1,0 +1,8 @@
+{    
+    "ROBOFLOW_API_KEY": "minge",
+    "ROBOFLOW_MODEL": "2",
+    "ROBOFLOW_SIZE": 951,
+
+    "FRAMERATE": 24,
+    "BUFFER": 0.5
+}
